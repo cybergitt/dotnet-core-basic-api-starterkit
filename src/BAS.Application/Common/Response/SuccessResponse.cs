@@ -4,7 +4,12 @@
     {
         public bool Success => true;
         public T Data { get; }
+        public string TraceId { get; }
 
-        public SuccessResponse(T data) => Data = data;
+        public SuccessResponse(T data, string traceId)
+        {
+            Data = data;
+            TraceId = traceId;
+        }
     }
 }
