@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using BAS.Application.Common.Constants;
+using FluentValidation;
 
 namespace BAS.API.Features.Tasks.Create
 {
@@ -6,8 +7,13 @@ namespace BAS.API.Features.Tasks.Create
     {
         public CreateTaskRequestValidator()
         {
-            RuleFor(x => x.Description).NotEmpty();
-            RuleFor(x => x.IsComplete).NotEmpty();
+            RuleFor(x => x.Description)
+                .NotEmpty()
+                    .WithMessage(string.Format(ValidationMessages.MustBeAlphabet, "{PropertyName}"));
+
+            RuleFor(x => x.IsComplete)
+                .Must(x => x == false || x == true)
+                    .WithMessage(string.Format(ValidationMessages.MustBeBoolean, "{PropertyName}"));
         }
     }
 }

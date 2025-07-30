@@ -24,7 +24,7 @@ namespace BAS.API.Features.Tasks.Get
             logger.LogDebug("Retrieved tasks: {@tasks}", tasks);
             //var response = tasks.Select(task => task.MapToResponse()).ToList();
             //var response = tasks.MapToResponse();
-            var response = new SuccessResponse<IEnumerable<TaskResponse>>(tasks.MapToResponse(), context.TraceIdentifier);
+            var response = new SuccessResponse<IEnumerable<TaskResponse>>(tasks.MapToResponse());
             return Results.Ok(response);
         }
     }

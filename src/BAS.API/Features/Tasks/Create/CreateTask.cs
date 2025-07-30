@@ -33,31 +33,41 @@ namespace BAS.API.Features.Tasks.Create
         ILogger<CreateTaskEndpoint> logger,
         CancellationToken cancellationToken)
         {
-            var validationResult = await validator.ValidateAsync(request, cancellationToken);
-            if (!validationResult.IsValid)
+            try
             {
-                return Results.ValidationProblem(validationResult.ToDictionary());
+                var validationResult = await validator.ValidateAsync(request, cancellationToken);
+                if (!validationResult.IsValid)
+                {
+                    //return Results.ValidationProblem(validationResult.ToDictionary());
+                    return validationResult.ToDictionary().ToProblem(context);
+                }
+                //await validator.ValidateAndThrowAsync(request); // Chaining exception handlers
+
+                var dataAlreadyExists = await todoTaskRepository.GetByDescAsync(request.Description, cancellationToken);
+
+                if (dataAlreadyExists != null)
+                {
+                    logger.LogError($"Data {request.Description} is already exists");
+                    //return Result<TaskResponse>.Failure(ApiErrors.Conflict, 422);
+                    //return Error.Conflict($"Shipment for order '{request.OrderId}' is already created").ToProblem();
+                    return Error.Conflict.ToProblem(context);
+                }
+
+                var data = request.MapToEntity();
+                var createdData = await todoTaskRepository.AddAsync(data, cancellationToken);
+                logger.LogDebug("Created data: {@createdData}", createdData);
+
+                //var response = createdData.MapToResponse();
+                //return Results.Ok(response);
+                //return Result<TaskResponse>.Success(response);
+                var response = new SuccessResponse<TaskResponse>(createdData.MapToResponse(), context);
+                return Results.Ok(response);
             }
-
-            var dataAlreadyExists = await todoTaskRepository.GetByDescAsync(request.Description, cancellationToken);
-
-            if (dataAlreadyExists != null)
+            catch (Exception ex)
             {
-                logger.LogError($"Data {request.Description} is already exists");
-                //return Result<TaskResponse>.Failure(ApiErrors.Conflict, 422);
-                //return Error.Conflict($"Shipment for order '{request.OrderId}' is already created").ToProblem();
-                return Error.Conflict.ToProblem(context);
+                logger.LogError("Stacktrace of error: {StackTrace}", ex.StackTrace);
+                return Error.Unexpected.ToProblem(context);
             }
-
-            var data = request.MapToEntity();
-            var createdData = await todoTaskRepository.AddAsync(data, cancellationToken);
-            logger.LogDebug("Created data: {@createdData}", createdData);
-
-            //var response = createdData.MapToResponse();
-            //return Results.Ok(response);
-            //return Result<TaskResponse>.Success(response);
-            var response = new SuccessResponse<TaskResponse>(createdData.MapToResponse(), context.TraceIdentifier);
-            return Results.Ok(response);
         }
     }
 }

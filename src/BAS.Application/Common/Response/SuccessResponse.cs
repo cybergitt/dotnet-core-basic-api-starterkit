@@ -1,21 +1,24 @@
-﻿namespace BAS.Application.Common.Response
+﻿using Microsoft.AspNetCore.Http;
+using System.Diagnostics;
+
+namespace BAS.Application.Common.Response
 {
     public class SuccessResponse<T>
     {
         public bool Success => true;
         public T Data { get; }
-        public string TraceId { get; }
+        public string? TraceId { get; }
 
-        public SuccessResponse(T data)
-        {
-            Data = data;
-            TraceId = string.Empty;
-        }
-
-        public SuccessResponse(T data, string traceId)
+        public SuccessResponse(T data, string? traceId = null)
         {
             Data = data;
             TraceId = traceId;
+        }
+
+        public SuccessResponse(T data, HttpContext context)
+        {
+            Data = data;
+            TraceId = Activity.Current?.Id ?? context.TraceIdentifier;
         }
     }
 }

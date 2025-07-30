@@ -1,9 +1,11 @@
 using BAS.API;
 using BAS.API.Extensions;
+using BAS.Application.Common.Exceptions;
 using BAS.Application.Common.Setting;
 using BAS.Infrastructure.Extensions;
 using BAS.Infrastructure.Logging;
 using Serilog;
+using System.Diagnostics;
 
 
 StaticLogger.EnsureInitialized();
@@ -37,7 +39,7 @@ try
             .Enrich.WithProperty("Environment", context.HostingEnvironment)
             .Enrich.With(new ThreadPriorityEnricher());
     });
-  builder.Services.RegisterEndpointsFromAssemblyContaining<IApiMarker>();
+    builder.Services.RegisterEndpointsFromAssemblyContaining<IApiMarker>();
 
     // Add services to the container.
 
@@ -53,7 +55,34 @@ try
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
 
+    // Adds services for using Problem Details format
+    //builder.Services.AddProblemDetails();
+    //builder.Services.AddProblemDetails(opts =>
+    //{
+    //    opts.CustomizeProblemDetails = context =>
+    //    {
+    //        var traceId = Activity.Current?.Id ?? context.HttpContext.TraceIdentifier;
+    //        // Helps to correlate logs and errors with the specific request.
+    //        context.ProblemDetails.Extensions.Add("traceId", traceId);
+
+    //        //context.ProblemDetails.Extensions.Add("correlationId", context.HttpContext.Request.Headers["X-Correlation-ID"]);
+    //        context.ProblemDetails.Extensions.Add("correlationId", Guid.NewGuid());
+    //        context.ProblemDetails.Extensions.Add("timestamp", DateTime.UtcNow);
+    //    };
+    //});
+
+    // Adds Chaining Exception Handlers
+    builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
+    builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+    builder.Services.AddProblemDetails();
+
     var app = builder.Build();
+
+    // Converts unhandled exceptions into Problem Details responses
+    app.UseExceptionHandler();
+
+    // Returns the Problem Details response for (empty) non-successful responses
+    app.UseStatusCodePages();
 
     // Configure the HTTP request pipeline.
     if (app.Environment.IsDevelopment())
