@@ -1,8 +1,8 @@
-﻿using BAS.API.Features.Tasks.Mapping;
+﻿using BAS.API.Extensions;
+using BAS.API.Features.Tasks.Mapping;
 using BAS.API.Features.Tasks.Responses;
-using BAS.Application.Common.Constants;
 using BAS.Application.Common.Errors;
-using BAS.Application.Common.Result;
+using BAS.Application.Common.Response;
 using BAS.Application.Interfaces;
 using BAS.Infrastructure.Persistence.Repositories;
 using FluentValidation;
@@ -25,7 +25,8 @@ namespace BAS.API.Features.Tasks.Create
             .WithOpenApi();
         }
 
-        private static async Task<Result<TaskResponse>> Handle(
+        private static async Task<IResult> Handle(
+        HttpContext context,
         [FromBody] CreateTaskRequest request,
         IValidator<CreateTaskRequest> validator,
         ITodoTaskRepository todoTaskRepository,
@@ -35,8 +36,7 @@ namespace BAS.API.Features.Tasks.Create
             var validationResult = await validator.ValidateAsync(request, cancellationToken);
             if (!validationResult.IsValid)
             {
-                //return Results.ValidationProblem(validationResult.ToDictionary());
-                logger.LogError($"Validation errors");
+                return Results.ValidationProblem(validationResult.ToDictionary());
             }
 
             var dataAlreadyExists = await todoTaskRepository.GetByDescAsync(request.Description, cancellationToken);
@@ -44,16 +44,20 @@ namespace BAS.API.Features.Tasks.Create
             if (dataAlreadyExists != null)
             {
                 logger.LogError($"Data {request.Description} is already exists");
-                return Result<TaskResponse>.Failure(ApiErrors.Conflict, 422);
+                //return Result<TaskResponse>.Failure(ApiErrors.Conflict, 422);
+                //return Error.Conflict($"Shipment for order '{request.OrderId}' is already created").ToProblem();
+                return Error.Conflict.ToProblem(context);
             }
 
             var data = request.MapToEntity();
             var createdData = await todoTaskRepository.AddAsync(data, cancellationToken);
             logger.LogDebug("Created data: {@createdData}", createdData);
 
-            var response = createdData.MapToResponse();
+            //var response = createdData.MapToResponse();
             //return Results.Ok(response);
-            return Result<TaskResponse>.Success(response);
+            //return Result<TaskResponse>.Success(response);
+            var response = new SuccessResponse<TaskResponse>(createdData.MapToResponse(), context.TraceIdentifier);
+            return Results.Ok(response);
         }
     }
 }

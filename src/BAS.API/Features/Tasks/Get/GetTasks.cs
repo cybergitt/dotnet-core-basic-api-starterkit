@@ -1,4 +1,6 @@
 ﻿using BAS.API.Features.Tasks.Mapping;
+using BAS.API.Features.Tasks.Responses;
+using BAS.Application.Common.Response;
 using BAS.Application.Interfaces;
 using BAS.Infrastructure.Persistence.Repositories;
 
@@ -13,6 +15,7 @@ namespace BAS.API.Features.Tasks.Get
                 .WithOpenApi();
         }
         private static async Task<IResult> Handle(
+            HttpContext context,
             ITodoTaskRepository todoTaskRepository,
             ILogger<GetTasksEndpoint> logger,
             CancellationToken cancellationToken)
@@ -20,7 +23,8 @@ namespace BAS.API.Features.Tasks.Get
             var tasks = await todoTaskRepository.GetAllAsync(cancellationToken);
             logger.LogDebug("Retrieved tasks: {@tasks}", tasks);
             //var response = tasks.Select(task => task.MapToResponse()).ToList();
-            var response = tasks.MapToResponse();
+            //var response = tasks.MapToResponse();
+            var response = new SuccessResponse<IEnumerable<TaskResponse>>(tasks.MapToResponse(), context.TraceIdentifier);
             return Results.Ok(response);
         }
     }

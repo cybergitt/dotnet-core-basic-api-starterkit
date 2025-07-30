@@ -6,6 +6,12 @@
         public T Data { get; }
         public string TraceId { get; }
 
+        public SuccessResponse(T data)
+        {
+            Data = data;
+            TraceId = string.Empty;
+        }
+
         public SuccessResponse(T data, string traceId)
         {
             Data = data;

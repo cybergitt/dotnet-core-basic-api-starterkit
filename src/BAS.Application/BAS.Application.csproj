@@ -7,11 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Common\Errors\ApiErrorsBak.bak" />
-    <Compile Include="Common\Errors\ErrorBak.bak" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Folder Include="Common\Exceptions\" />
     <Folder Include="Common\Helpers\" />
     <Folder Include="Common\Utils\" />
