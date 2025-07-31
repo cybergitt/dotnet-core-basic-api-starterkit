@@ -38,7 +38,7 @@ namespace BAS.Application.Common.Exceptions
                 extensions: new Dictionary<string, object?>
                 {
                     {"traceId",  traceId},
-                    {"correlationId",  Guid.NewGuid()},
+                    //{"correlationId",  Guid.NewGuid()},
                     {"timestamp",  DateTime.UtcNow}
                 }
             ).ExecuteAsync(httpContext);

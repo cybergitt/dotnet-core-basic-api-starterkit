@@ -45,7 +45,7 @@ namespace BAS.API.Extensions
                 Extensions =
                 {
                     ["traceId"] = traceId,
-                    ["correlationId"] = Guid.NewGuid(),
+                    //{"correlationId",  Guid.NewGuid()},
                     ["timestamp"] = DateTime.UtcNow
                 }
             };
@@ -64,7 +64,7 @@ namespace BAS.API.Extensions
             validationProblem.Detail = "One or more validation errors occurred.";
             validationProblem.Instance = instance;
             validationProblem.Extensions.Add("traceId", traceId);
-            validationProblem.Extensions.Add("correlationId", Guid.NewGuid());
+            //validationProblem.Extensions.Add("correlationId", Guid.NewGuid());
             validationProblem.Extensions.Add("timestamp", DateTime.UtcNow);
 
             return Results.BadRequest(validationProblem);
@@ -81,7 +81,7 @@ namespace BAS.API.Extensions
             validationProblem.Detail = "One or more validation errors occurred.";
             validationProblem.Instance = instance;
             validationProblem.Extensions.Add("traceId", traceId);
-            validationProblem.Extensions.Add("correlationId", Guid.NewGuid());
+            //validationProblem.Extensions.Add("correlationId", Guid.NewGuid());
             validationProblem.Extensions.Add("timestamp", DateTime.UtcNow);
 
             return Results.BadRequest(validationProblem);

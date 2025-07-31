@@ -6,7 +6,6 @@ using BAS.Application.Middlewares;
 using BAS.Infrastructure.Extensions;
 using BAS.Infrastructure.Logging;
 using Serilog;
-using System.Diagnostics;
 
 
 StaticLogger.EnsureInitialized();
@@ -113,8 +112,8 @@ try
     //app.UseMiddleware<JwtMiddleware>(); // JWT Middleware
     app.UseMiddleware<AntiXssMiddleware>();
 
-    app.UseAuthentication();
-    app.UseAuthorization();
+    //app.UseAuthentication();
+    //app.UseAuthorization();
 
     app.MapEndpoints();
 
