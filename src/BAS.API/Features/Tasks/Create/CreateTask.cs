@@ -60,7 +60,7 @@ namespace BAS.API.Features.Tasks.Create
                 //var response = createdData.MapToResponse();
                 //return Results.Ok(response);
                 //return Result<TaskResponse>.Success(response);
-                var response = new SuccessResponse<TaskResponse>(createdData.MapToResponse(), context);
+                var response = new SuccessResponse<TaskResponse>(createdData.MapToResponse());
                 return Results.Ok(response);
             }
             catch (Exception ex)

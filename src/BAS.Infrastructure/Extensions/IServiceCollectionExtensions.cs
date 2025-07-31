@@ -1,4 +1,5 @@
 ﻿using BAS.Application.Common.Setting;
+using BAS.Application.Middlewares;
 using BAS.Infrastructure.Persistence;
 using BAS.Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -12,7 +13,10 @@ namespace BAS.Infrastructure.Extensions
         public static void AddInfrastructureLayer(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddDbContext(configuration);
+            services.AddRedisConfig(configuration);
             services.AddRepositories();
+            services.AddTransient<SecurityHeaderMiddleware>();
+            services.AddTransient<AntiXssMiddleware>();
         }
 
         public static void AddDbContext(this IServiceCollection services, IConfiguration configuration)
@@ -59,6 +63,33 @@ namespace BAS.Infrastructure.Extensions
                         sqlOptions.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName);
                     }
                 );
+            });
+        }
+
+        public static void AddRedisConfig(this IServiceCollection services, IConfiguration configuration)
+        {
+            var cacheSection = configuration.GetSection(nameof(CacheSettings));
+            services.Configure<CacheSettings>(cacheSection);
+            var cacheSettings = cacheSection.Get<CacheSettings>();
+
+            //var serviceProvider = services.BuildServiceProvider();
+            //var encryptionService = serviceProvider.GetService<IEncryptionService>();
+
+            services.AddStackExchangeRedisCache(options =>
+            {
+                //options.Configuration = configuration.GetConnectionString("RedisConn");
+                //bool envShouldEncrypt = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production";
+                //if (!envShouldEncrypt)
+                //{
+                //    options.Configuration = cacheOptions.CacheConnectionUrl;
+                //}
+                //else
+                //{
+                //    options.Configuration = encryptionService.Decrypt(cacheOptions.CacheConnectionUrl);
+                //}
+                //options.InstanceName = "MPCache_";
+                options.Configuration = cacheSettings.CacheConnectionUrl;
+                options.InstanceName = "BASCache_";
             });
         }
 

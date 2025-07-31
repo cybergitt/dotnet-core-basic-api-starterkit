@@ -2,6 +2,7 @@ using BAS.API;
 using BAS.API.Extensions;
 using BAS.Application.Common.Exceptions;
 using BAS.Application.Common.Setting;
+using BAS.Application.Middlewares;
 using BAS.Infrastructure.Extensions;
 using BAS.Infrastructure.Logging;
 using Serilog;
@@ -39,6 +40,8 @@ try
             .Enrich.WithProperty("Environment", context.HostingEnvironment)
             .Enrich.With(new ThreadPriorityEnricher());
     });
+
+    // Use reflection to scan our .NET assemblies and find classes that implement IEndpoint
     builder.Services.RegisterEndpointsFromAssemblyContaining<IApiMarker>();
 
     // Add services to the container.
@@ -48,8 +51,14 @@ try
     builder.Services.AddOptions<DbSettings>().Bind(builder.Configuration.GetSection(nameof(DbSettings)));
     builder.Services.AddOptions<CacheSettings>().Bind(builder.Configuration.GetSection(nameof(CacheSettings)));
 
+    // Register services from separated layers
     builder.Services.AddInfrastructureLayer(builder.Configuration);
     builder.Services.AddApiLayer(builder.Configuration);
+
+    // Adds Chaining Exception Handlers
+    builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
+    builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+    builder.Services.AddProblemDetails();
 
     // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
     builder.Services.AddEndpointsApiExplorer();
@@ -71,11 +80,6 @@ try
     //    };
     //});
 
-    // Adds Chaining Exception Handlers
-    builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
-    builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
-    builder.Services.AddProblemDetails();
-
     var app = builder.Build();
 
     // Converts unhandled exceptions into Problem Details responses
@@ -85,7 +89,7 @@ try
     app.UseStatusCodePages();
 
     // Configure the HTTP request pipeline.
-    if (app.Environment.IsDevelopment())
+    if (app.Environment.Equals("Local") || app.Environment.IsDevelopment())
     {
         app.UseSwagger();
         app.UseSwaggerUI();
@@ -101,6 +105,16 @@ try
     {
         app.UseHsts();
     }
+
+    // Must be betwwen app.UseRouting() and app.UseEndPoints()
+    // maintain middleware order
+    app.UseCors("CorsPolicy");
+    app.UseMiddleware<SecurityHeaderMiddleware>();
+    //app.UseMiddleware<JwtMiddleware>(); // JWT Middleware
+    app.UseMiddleware<AntiXssMiddleware>();
+
+    app.UseAuthentication();
+    app.UseAuthorization();
 
     app.MapEndpoints();
 
