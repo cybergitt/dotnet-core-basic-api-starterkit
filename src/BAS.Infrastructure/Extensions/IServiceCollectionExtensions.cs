@@ -90,6 +90,11 @@ namespace BAS.Infrastructure.Extensions
                 //options.InstanceName = "MPCache_";
                 options.Configuration = cacheSettings.CacheConnectionUrl;
                 options.InstanceName = "BASCache_";
+                options.ConfigurationOptions = new StackExchange.Redis.ConfigurationOptions()
+                {
+                    AbortOnConnectFail = true,
+                    EndPoints = { options.Configuration }
+                };
             });
         }
 

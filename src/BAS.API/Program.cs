@@ -1,10 +1,12 @@
 using BAS.API;
 using BAS.API.Extensions;
+using BAS.Application.Common.Constants;
 using BAS.Application.Common.Exceptions;
 using BAS.Application.Common.Setting;
 using BAS.Application.Middlewares;
 using BAS.Infrastructure.Extensions;
 using BAS.Infrastructure.Logging;
+using Microsoft.OpenApi.Models;
 using Serilog;
 
 
@@ -61,7 +63,28 @@ try
 
     // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
     builder.Services.AddEndpointsApiExplorer();
-    builder.Services.AddSwaggerGen();
+    //builder.Services.AddSwaggerGen();
+    builder.Services.AddSwaggerGen(c =>
+    {
+        c.AddSecurityDefinition("ApiKey", new OpenApiSecurityScheme
+        {
+            Description = "API Key needed to access the endpoints. Use header: " + HeaderConstant.ApiKey,
+            In = ParameterLocation.Header,
+            Name = HeaderConstant.ApiKey,
+            Type = SecuritySchemeType.ApiKey,
+            Scheme = "ApiKeyScheme"
+        });
+
+        c.AddSecurityRequirement(new OpenApiSecurityRequirement {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "ApiKey" }
+            },
+            new string[] {}
+        }
+    });
+    });
 
     // Adds services for using Problem Details format
     //builder.Services.AddProblemDetails();
