@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -20,8 +20,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BAS.Application\BAS.Application.csproj" />
-    <ProjectReference Include="..\BAS.Domain\BAS.Domain.csproj" />
-    <ProjectReference Include="..\BAS.Infrastructure\BAS.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>

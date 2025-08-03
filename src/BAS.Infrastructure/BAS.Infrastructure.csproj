@@ -22,7 +22,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\BAS.Application\BAS.Application.csproj" />
     <ProjectReference Include="..\BAS.Domain\BAS.Domain.csproj" />
   </ItemGroup>
 

@@ -3,8 +3,8 @@ using BAS.API.Extensions;
 using BAS.Application.Common.Constants;
 using BAS.Application.Common.Exceptions;
 using BAS.Application.Common.Setting;
+using BAS.Application.Extensions;
 using BAS.Application.Middlewares;
-using BAS.Infrastructure.Extensions;
 using BAS.Infrastructure.Logging;
 using Microsoft.OpenApi.Models;
 using Serilog;
@@ -53,7 +53,7 @@ try
     builder.Services.AddOptions<CacheSettings>().Bind(builder.Configuration.GetSection(nameof(CacheSettings)));
 
     // Register services from separated layers
-    builder.Services.AddInfrastructureLayer(builder.Configuration);
+    builder.Services.AddApplicationLayer(builder.Configuration);
     builder.Services.AddApiLayer(builder.Configuration);
 
     // Adds Chaining Exception Handlers
@@ -132,8 +132,9 @@ try
     // maintain middleware order
     app.UseCors("CorsPolicy");
     app.UseMiddleware<SecurityHeaderMiddleware>();
-    //app.UseMiddleware<JwtMiddleware>(); // JWT Middleware
     app.UseMiddleware<AntiXssMiddleware>();
+    //app.UseMiddleware<JwtMiddleware>(); // JWT Middleware
+    app.UseMiddleware<ApiKeyMiddleware>(); // API Key Middleware
 
     //app.UseAuthentication();
     //app.UseAuthorization();

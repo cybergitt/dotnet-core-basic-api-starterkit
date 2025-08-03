@@ -16,13 +16,13 @@ namespace BAS.API.Features.Tasks.Mapping
 
         public static TaskResponse MapToResponse(this TodoTask source)
             => new(
-                source.Id, 
-                source.Description, 
-                source.Completed, 
+                source.Id,
+                source.Description,
+                source.Completed,
                 source.CreatedAt
                 );
 
-        public static IEnumerable<TaskResponse> MapToResponse(this IEnumerable<TodoTask> sources) => 
+        public static IEnumerable<TaskResponse> MapToResponse(this IEnumerable<TodoTask> sources) =>
             sources.Select(source => source.MapToResponse());
     }
 }

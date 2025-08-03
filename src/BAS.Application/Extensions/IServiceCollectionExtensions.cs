@@ -1,22 +1,24 @@
 ﻿using BAS.Application.Common.Setting;
 using BAS.Application.Middlewares;
+using BAS.Application.Security.Authentication;
 using BAS.Infrastructure.Persistence;
 using BAS.Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace BAS.Infrastructure.Extensions
+namespace BAS.Application.Extensions
 {
     public static class IServiceCollectionExtensions
     {
-        public static void AddInfrastructureLayer(this IServiceCollection services, IConfiguration configuration)
+        public static void AddApplicationLayer(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddDbContext(configuration);
             services.AddRedisConfig(configuration);
             services.AddRepositories();
             services.AddTransient<SecurityHeaderMiddleware>();
             services.AddTransient<AntiXssMiddleware>();
+            services.AddTransient<ICachedApiKeyValidation, CachedApiKeyValidation>();
         }
 
         public static void AddDbContext(this IServiceCollection services, IConfiguration configuration)
@@ -89,7 +91,7 @@ namespace BAS.Infrastructure.Extensions
                 //}
                 //options.InstanceName = "MPCache_";
                 options.Configuration = cacheSettings.CacheConnectionUrl;
-                options.InstanceName = "BASCache_";
+                //options.InstanceName = "BASCache_";
                 options.ConfigurationOptions = new StackExchange.Redis.ConfigurationOptions()
                 {
                     AbortOnConnectFail = true,
